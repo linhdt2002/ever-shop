@@ -1,0 +1,66 @@
+import { test, expect, Page } from '@playwright/test';
+import { data } from '../../data/login-data';
+
+test.beforeEach("Navigate", async ({page})=> {
+    await page.goto('https://demo.evershop.io/admin/login');
+});
+
+for (let input of data) {
+    test(`Verify login fail when username is ${input.username} and password is ${input.password}`, async ({ page }) => {
+    await inputTextboxByLabel("Email", input.username, page);
+    await inputTextboxByLabel("Password", input.password, page);
+    await clickButtonByLabel("SIGN IN", page);
+    for (let item of input.expected) {
+        await verifyFieldErrorMessageByLabel(item.field, item.message, page);
+    }
+});
+}
+
+test('Verify login successful', async ({ page }) => {
+  await inputTextboxByLabel("Email", "demo@evershop.io", page);
+  await inputTextboxByLabel("Password", "123456", page);
+  await clickButtonByLabel("SIGN IN", page);
+  let dashboardHeaderXpath = `//h1[contains(concat(" ", @class, " "), " page-heading-title ") and normalize-space()="Dashboard"]`;
+  await expect(page.locator(dashboardHeaderXpath)).toBeVisible();
+});
+
+test('Verify login fail when username is empty', async ({ page }) => {
+  await inputTextboxByLabel("Email", "", page);
+  await inputTextboxByLabel("Password", "123456", page);
+  await clickButtonByLabel("SIGN IN", page);
+  await verifyFieldErrorMessageByLabel("Email", "Email is required", page);
+});
+
+test('Verify login fail when password is empty', async ({ page }) => {
+  await inputTextboxByLabel("Email", "demo@evershop.io", page);
+  await inputTextboxByLabel("Password", "", page);
+  await clickButtonByLabel("SIGN IN", page);
+  await verifyFieldErrorMessageByLabel("Password", "Password is required", page);
+});
+
+test('Verify login fail when password is invalid', async ({ page }) => {
+  await inputTextboxByLabel("Email", "Invalid email", page);
+  await inputTextboxByLabel("Password", "123456", page);
+  await clickButtonByLabel("SIGN IN", page);
+  await verifyFieldErrorMessageByLabel("Email", "Please enter a valid email address", page);
+});
+
+async function inputTextboxByLabel(label: string, input: string, page: Page) {
+    let xpath = `(//label[contains(normalize-space(), "${label}")]/following::input)[1]`;
+    let inputLocator = page.locator(xpath);
+    await inputLocator.click();
+    await inputLocator.clear();
+    await inputLocator.fill(input);
+}
+
+async function clickButtonByLabel(label: string, page: Page) {
+    let xpath = `//*[(@role='button' or self::button or self::input) 
+    and (normalize-space()='${label}' or @value='${label}')] `;
+
+    await page.locator(xpath).click();
+}
+
+async function verifyFieldErrorMessageByLabel(label: string, errorMessage: string, page: Page) {
+    let xpath = `//label[contains(normalize-space(), "${label}")]/following::div[@role="alert" and normalize-space()="${errorMessage}"]`;
+    await expect(page.locator(xpath)).toBeVisible();
+}
