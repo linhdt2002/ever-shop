@@ -1,5 +1,6 @@
 import { test, expect, Page } from '@playwright/test';
-import { data } from '../../data/login-data';
+import { data } from '../../../data/login-data';
+import { clickButtonByLabel, inputTextboxByLabel, verifyFieldErrorMessageByLabel } from '../../../src/common';
 
 test.beforeEach("Navigate", async ({page})=> {
     await page.goto('https://demo.evershop.io/admin/login');
@@ -45,22 +46,3 @@ test('Verify login fail when password is invalid', async ({ page }) => {
   await verifyFieldErrorMessageByLabel("Email", "Please enter a valid email address", page);
 });
 
-async function inputTextboxByLabel(label: string, input: string, page: Page) {
-    let xpath = `(//label[contains(normalize-space(), "${label}")]/following::input)[1]`;
-    let inputLocator = page.locator(xpath);
-    await inputLocator.click();
-    await inputLocator.clear();
-    await inputLocator.fill(input);
-}
-
-async function clickButtonByLabel(label: string, page: Page) {
-    let xpath = `//*[(@role='button' or self::button or self::input) 
-    and (normalize-space()='${label}' or @value='${label}')] `;
-
-    await page.locator(xpath).click();
-}
-
-async function verifyFieldErrorMessageByLabel(label: string, errorMessage: string, page: Page) {
-    let xpath = `//label[contains(normalize-space(), "${label}")]/following::div[@role="alert" and normalize-space()="${errorMessage}"]`;
-    await expect(page.locator(xpath)).toBeVisible();
-}
