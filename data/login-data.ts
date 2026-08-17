@@ -1,31 +1,31 @@
 export const data = [
     {
         username: "",
-        password: "123456",
+        password: "password",
         expected: [
             {
                 field: "Email",
-                message: "Email is required"
+                message: "This field can not be empty"
             }
         ]
     },
     {
-        username: "demo@evershop.io",
+        username: "dtlinh010202@gmail.com",
         password: "",
         expected: [
             {
                 field: "Password",
-                message: "Password is required"
+                message: "This field can not be empty"
             }
         ]
     },
     {
         username: "Invalid email",
-        password: "123456",
+        password: "password",
         expected: [
             {
                 field: "Email",
-                message: "Please enter a valid email address"
+                message: "Invalid email"
             }
         ]
     }

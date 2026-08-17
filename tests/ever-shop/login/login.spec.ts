@@ -1,48 +1,27 @@
 import { test, expect, Page } from '@playwright/test';
 import { data } from '../../../data/login-data';
-import { clickButtonByLabel, inputTextboxByLabel, verifyFieldErrorMessageByLabel } from '../../../src/common';
+import { LoginPage } from '../../../src/pages/login-page';
+import { DashboardPage } from '../../../src/pages/dashboard-page';
+import { URL } from '../../../src/utils/constant-utils';
 
+let loginPage: LoginPage;
+let dashboardPage: DashboardPage;
 test.beforeEach("Navigate", async ({page})=> {
-    await page.goto('https://demo.evershop.io/admin/login');
-});
+    await page.goto(URL);
+    loginPage = new LoginPage(page);
+    dashboardPage = new DashboardPage(page);
+  });
 
 for (let input of data) {
     test(`Verify login fail when username is ${input.username} and password is ${input.password}`, async ({ page }) => {
-    await inputTextboxByLabel("Email", input.username, page);
-    await inputTextboxByLabel("Password", input.password, page);
-    await clickButtonByLabel("SIGN IN", page);
-    for (let item of input.expected) {
-        await verifyFieldErrorMessageByLabel(item.field, item.message, page);
-    }
+      loginPage.login(input.username, input.password);
+      for (let item of input.expected) {
+          await loginPage.verifyFieldErrorMessageByLabel(item.field, item.message);
+      }
 });
 }
 
 test('Verify login successful', async ({ page }) => {
-  await inputTextboxByLabel("Email", "demo@evershop.io", page);
-  await inputTextboxByLabel("Password", "123456", page);
-  await clickButtonByLabel("SIGN IN", page);
-  let dashboardHeaderXpath = `//h1[contains(concat(" ", @class, " "), " page-heading-title ") and normalize-space()="Dashboard"]`;
-  await expect(page.locator(dashboardHeaderXpath)).toBeVisible();
+  loginPage.login("dtlinh010202@gmail.com", "password");
+  await dashboardPage.isOnPage();
 });
-
-test('Verify login fail when username is empty', async ({ page }) => {
-  await inputTextboxByLabel("Email", "", page);
-  await inputTextboxByLabel("Password", "123456", page);
-  await clickButtonByLabel("SIGN IN", page);
-  await verifyFieldErrorMessageByLabel("Email", "Email is required", page);
-});
-
-test('Verify login fail when password is empty', async ({ page }) => {
-  await inputTextboxByLabel("Email", "demo@evershop.io", page);
-  await inputTextboxByLabel("Password", "", page);
-  await clickButtonByLabel("SIGN IN", page);
-  await verifyFieldErrorMessageByLabel("Password", "Password is required", page);
-});
-
-test('Verify login fail when password is invalid', async ({ page }) => {
-  await inputTextboxByLabel("Email", "Invalid email", page);
-  await inputTextboxByLabel("Password", "123456", page);
-  await clickButtonByLabel("SIGN IN", page);
-  await verifyFieldErrorMessageByLabel("Email", "Please enter a valid email address", page);
-});
-

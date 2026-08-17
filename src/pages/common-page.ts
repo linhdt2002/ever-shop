@@ -24,7 +24,7 @@ export class CommonPage {
     }
     
     async verifyFieldErrorMessageByLabel(label: string, errorMessage: string) {
-        let xpath = `//label[contains(normalize-space(), "${label}")]/following::div[@role="alert" and normalize-space()="${errorMessage}"]`;
+        let xpath = `//label[contains(normalize-space(), "${label}")]/following::div[normalize-space()="${errorMessage}"]`;
         await expect(this.page.locator(xpath)).toBeVisible();
     }
     

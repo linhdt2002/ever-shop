@@ -6,15 +6,18 @@ import { NewProductPage } from '../../../src/pages/new-product-page';
 import { LoginPage } from '../../../src/pages/login-page';
 import { DashboardPage } from '../../../src/pages/dashboard-page';
 
+let newProductPage: NewProductPage;
+let loginPage: LoginPage;
+let dashboardPage: DashboardPage;
+
 test.beforeEach("Navigate", async ({page})=> {
     await page.goto(URL);
+    newProductPage = new NewProductPage(page);
+    loginPage = new LoginPage(page);
+    dashboardPage = new DashboardPage(page);
 });
 
 test('Verify login successful', async ({ page }) => {
-  let newProductPage = new NewProductPage(page);
-  let loginPage = new LoginPage(page);
-  let dashboardPage = new DashboardPage(page);
-
   await loginPage.inputTextboxByLabel("Email", ADMIN_USERNAME);
   await loginPage.inputTextboxByLabel("Password", ADMIN_PASSWORD);
   await loginPage.clickButtonByLabel("SIGN IN");
