@@ -1,4 +1,5 @@
-import { expect, Page } from "@playwright/test";
+import { expect, Page, request } from "@playwright/test";
+import { API_URL } from "../utils/constant-utils";
 
 export class CommonPage {
     page: Page;
@@ -45,5 +46,28 @@ export class CommonPage {
     
     async verifyNotificationMessage(message: string) {
         await expect(this.page.getByText(message));
+    }
+
+    async getTextBoxValueByLabel(label: string) {
+        let xpathTextBox = `(//label[contains(normalize-space(), "${label}")]/following::input)[1]`;
+        let xpathTextArea = `(//label[contains(normalize-space(), "${label}")]/following::textarea)[1]`;
+        let inputLocator = this.page.locator(`${xpathTextArea} | ${xpathTextBox}`).first();
+        return inputLocator.inputValue();
+    }
+
+    async getCookies() {
+        let cookies = await this.page.context().cookies();
+        let asid = cookies.find(obj => obj.name == 'asid');
+        let sid = cookies.find(obj => obj.name == "sid");
+        return `sid=${sid?.value};asid=${asid?.value}`;
+    }
+
+    async deleteProductById(cookie: string, productId: string) {
+        let req = await request.newContext()
+        await req.delete(`${API_URL}/api/products/${productId}`, {
+            headers: {
+                cookie: cookie
+            }
+        })    
     }
 }
